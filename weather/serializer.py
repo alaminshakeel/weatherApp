@@ -1,16 +1,11 @@
 from rest_framework import serializers
 
-from weather.models import CurrentWeatherData
+from weather.models import WeatherForeCastData
 import json
 
-class CurrentWeatherDataSerializer(serializers.ModelSerializer):
-    data = serializers.SerializerMethodField()
+class WeatherForeCastDataSerializer(serializers.ModelSerializer):
     
     class Meta:
-        model = CurrentWeatherData
-        fields = ('data',)
-
-    def get_data(self, obj):
-        print(json.loads(obj.value))
-        return json.loads(obj.value)
+        model = WeatherForeCastData
+        fields = ('dt_text','icon', 'description', 'temp', 'humidity')
 

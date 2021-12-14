@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from weather.helper import get_weather_api_endpoint
-from weather.models import CurrentWeatherData
-from weather.serializer import CurrentWeatherDataSerializer
+from weather.models import CurrentWeatherData, WeatherForeCastData
+from weather.serializer import WeatherForeCastDataSerializer
 from weatherapp import settings
 import requests
 import json
@@ -93,12 +93,36 @@ class WeatherForeCastView(APIView):
 
                 # print(json.loads(resp)['ip'])
                 data = json.loads(resp)
+                print(data)
 
-                print(data['list'])
+                #print(data['list'])
+                f_list = []
+                for idx, item in enumerate(data['list']):
+                    if idx % 8 == 0:
+                        f_list.append({
+                            'dt_text': item['dt_txt'].split(' ')[0],
+                            'icon': "https://openweathermap.org/img/wn/" + item['weather'][0]['icon'] + "@2x.png",
+                            'description': item['weather'][0]['description'],
+                            'temp': item['main']['temp'],
+                            'humidity': item['main']['humidity']
+                        }) 
+
+                print(f_list)
+                
                 # storing to db for later cache
+                WeatherForeCastData.objects.all().delete()
+                for idx, item in enumerate(data['list']):
+                    if idx % 8 == 0:
+                        WeatherForeCastData(
+                            dt_text=item['dt_txt'].split(' ')[0],
+                            icon="https://openweathermap.org/img/wn/" + item['weather'][0]['icon'] + "@2x.png",
+                            description=item['weather'][0]['description'],
+                            temp=item['main']['temp'],
+                            humidity=item['main']['humidity']
+                        ).save()
 
                 return Response({
-                    'data': data,
+                    'data': f_list,
                 }, status=status.HTTP_200_OK)
                 
             return Response({
@@ -107,10 +131,10 @@ class WeatherForeCastView(APIView):
         except:
 
             # fetching data from db 
-            resp = CurrentWeatherData.objects.filter(key=resource).first()
+            resp = WeatherForeCastData.objects.all()
 
             # serialize
-            data = json.loads(resp.value)
+            data = WeatherForeCastDataSerializer(resp, many=True).data
             print(data)
 
             return Response({

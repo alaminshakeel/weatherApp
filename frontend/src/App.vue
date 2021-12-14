@@ -42,12 +42,12 @@
                 <h3 class="font-weight-bold my-4">5-Day Forecast:</h3>
                 <div class="row text-center" id="forecastRow"></div>
                 <!-- Forecast 1 -->
-                <div class="col-20">
+                <div class="col-20" v-for="item in forecastData" v-bind:key="item.dt_text">
                   <div class="forecast-container bg-primary text-white mb-4">
-                    <h5 class="date-title font-weight-bold"></h5>
-                    <img id="forecastIcon" alt="Weather Forecast Icon">
-                    <p class="font-weight-bold">Temperature: <span id="tempForecast" class="font-weight-normal"></span></p>
-                    <p class="font-weight-bold">Humidity: <span id="humidityForecast" class="font-weight-normal"></span></p>
+                    <h5 class="date-title font-weight-bold">{{item.dt_text}}</h5>
+                    <img id="forecastIcon" alt="heavy intensity rain" :src="item.icon">
+                    <p class="font-weight-bold">Temperature: <span id="tempForecast" class="font-weight-normal">{{item.temp}} °F</span></p>
+                    <p class="font-weight-bold">Humidity: <span id="humidityForecast" class="font-weight-normal">{{item.humidity}}%</span></p>
                   </div>
                 </div>
 
@@ -71,9 +71,6 @@ export default {
   data(){
 
     return {      
-
-      // openWeatherQueryUrl: "https://api.openweathermap.org/data/2.5/",
-      // apiKey: "cce801f5223df23bb3369079c0a9d97e",
 
       rawWeatherData: '', // raw response from weather api
       cityInputVal: "",
@@ -107,7 +104,7 @@ export default {
       
       this.getCurrentWeather(this.currentCityName);
 
-      this.getForecast(this.currentCityName);
+      this.getFiveDayForecast(this.currentCityName);
       
     },
 
@@ -122,7 +119,7 @@ export default {
 
       } else {
         this.getCurrentWeather(cityInput);
-        this.getForecast(cityInput);
+        this.getFiveDayForecast(cityInput);
         this.cityInputVal = "";
       }
     },
@@ -132,20 +129,6 @@ export default {
         month = "" + (d.getMonth() + 1),
         day = "" + d.getDate(),
         year = d.getFullYear();
-      return [month, day, year].join("/");
-    },
-
-    formatDate: function(date) {
-      var year = date.split("-")[0];
-      var month = date.split("-")[1];
-      var day = date.split("-")[2];
-      // to get rid of the 0 in front of the month or day if it exists
-      if (month.charAt(0) === "0") {
-        month = month.slice(1);
-      }
-      if (day.charAt(0) === "0") {
-        day = day.slice(1);
-      }
       return [month, day, year].join("/");
     },
 
@@ -246,72 +229,7 @@ export default {
 
     },
 
-    // This function gets the 5 day forecast for the input city. It includes weather data every 3 hours.
-    getForecast: function(cityName) {
-      // For temperature in Fahrenheit and wind speed in miles/hour use units=imperial
-      var url = "forecast?q=" +
-        cityName +
-        "&units=imperial";
-
-      fetch(url)
-        // First we need to check that the response status is 200 before parsing the response as JSON.
-        .then(function (response) {
-          if (!response.ok) {
-            console.log("There is an issue. Status Code: " + response.status);
-            return;
-          } else {
-            return response.json(); // we only get here if there is no error
-          }
-        })
-        .then(function (forecastData) {
-          alert('sdfoweif')
-          console.log("Here is the object containing the forcast data");
-          console.log(forecastData);
-          // define forecastObject variable multiple times and have different property values each iteration of the loop.
-          // declarare empty array
-          var ourForecastObject = [];
-          // iterate throughout the returned object to make an array of objects called "forecastObject" that contains only the data we want to append to the page
-          for (let i = 0; i < forecastData.list.length; i++) {
-            // if array iteration is divisible by 8
-            if (i % 8 === 0) {
-              // we will push data to object
-              ourForecastObject.push({
-                date: forecastData.list[i].dt_txt.split(" ")[0],
-                icon: forecastData.list[i].weather[0].icon,
-                iconAlt: forecastData.list[i].weather[0].description,
-                temp: forecastData.list[i].main.temp,
-                humidity: forecastData.list[i].main.humidity,
-              });
-            }
-          }
-          // iterate throughout "ourForecastObject" to print the forcast to the webpage
-          for (let i = 0; i < ourForecastObject.length; i++) {
-            var dateTitle = document.querySelectorAll(".date-title");
-            var iconEl = document.querySelectorAll("#forecastIcon");
-            var tempSpan = document.querySelectorAll("#tempForecast");
-            var humiditySpan = document.querySelectorAll("#humidityForecast");
-
-            dateTitle[i].textContent = this.formatDate(ourForecastObject[i].date);
-            iconEl[i].setAttribute(
-              "src",
-              "https://openweathermap.org/img/wn/" +
-                ourForecastObject[i].icon +
-                "@2x.png"
-            );
-            iconEl[i].setAttribute("alt", ourForecastObject[i].iconAlt);
-            tempSpan[i].textContent = ourForecastObject[i].temp + " °F";
-            humiditySpan[i].textContent = ourForecastObject[i].humidity + "%";
-          }
-
-          console.log(ourForecastObject);
-          console.log("------------------------------------------------");
-        })
-        .catch(function (error) {
-          console.log("There is an error: " + error);
-        });
-    },
-
-    getFiveDayForecast: async function(){
+    getFiveDayForecast: async function(cityName){
       
       var url = 'http://localhost:8000/api/forecast/?city_name=' + cityName;
 
