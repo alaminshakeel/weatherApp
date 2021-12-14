@@ -30,7 +30,6 @@ class CurrentWeatherView(APIView):
                 lon = request.GET['lon']
                 url = get_weather_api_endpoint(resource)+'&lat=' + lat + '&lon=' + lon
 
-            print(url)
             response = requests.get(url)
 
             if response.status_code == 200:
@@ -61,7 +60,6 @@ class CurrentWeatherView(APIView):
 
             # serialize
             data = json.loads(resp.value)
-            print(data)
 
             return Response({
                 'data': data
@@ -91,9 +89,7 @@ class WeatherForeCastView(APIView):
                 else:
                     resp = response.content
 
-                # print(json.loads(resp)['ip'])
                 data = json.loads(resp)
-                print(data)
 
                 #print(data['list'])
                 f_list = []
@@ -107,7 +103,6 @@ class WeatherForeCastView(APIView):
                             'humidity': item['main']['humidity']
                         }) 
 
-                print(f_list)
                 
                 # storing to db for later cache
                 WeatherForeCastData.objects.all().delete()
@@ -135,7 +130,6 @@ class WeatherForeCastView(APIView):
 
             # serialize
             data = WeatherForeCastDataSerializer(resp, many=True).data
-            print(data)
 
             return Response({
                 'data': data
