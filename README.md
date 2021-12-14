@@ -17,6 +17,11 @@ python manage.py runserver
 
 # build for production with minification
 cd frontend
+
+# install frontend dependencies
+npm install
+
+# run production build
 npm run build
 ```
 
