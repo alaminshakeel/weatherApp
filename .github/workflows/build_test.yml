@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,23 +28,44 @@ jobs:
           npm run build
 
   deploy:
-    needs: [test]
+    needs: [build]
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v2
+      - name: Copy repository contents via scp
+      uses: appleboy/scp-action@master
+      env:
+        HOST: ${{ secrets.VPSDIME_HOST }}
+        USERNAME: ${{ secrets.VPSDIME_USERNAME }}
+        PORT: ${{ secrets.VPSDIME_PORT }}
+        KEY: ${{ secrets.VPSDIME_SSHKEY }}
+      with:
+        source: "."
+        target: "/var/www/mywebsite"
 
-      - name: Generate deployment package
-        run: zip -r deploy.zip . -x '*.git*'
+    - name: Executing remote command
+      uses: appleboy/ssh-action@master
+      with:
+        HOST: ${{ secrets.VPSDIME_HOST }}
+        USERNAME: ${{ secrets.VPSDIME_USERNAME }}
+        PORT: ${{ secrets.VPSDIME_PORT }}
+        KEY: ${{ secrets.VPSDIME_SSHKEY }}
+        script: ls
 
-      - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v20
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: django-github-action-aws
-          environment_name: Djangogithubactionaws-env
-          version_label: 12350
-          region: "us-east-1"
-          deployment_package: deploy.zip
+
+      # - name: Checkout source code
+      #   uses: actions/checkout@v2
+
+      # - name: Generate deployment package
+      #   run: zip -r deploy.zip . -x '*.git*'
+
+      # - name: Deploy to EB
+      #   uses: einaregilsson/beanstalk-deploy@v20
+      #   with:
+      #     aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     application_name: django-github-action-aws
+      #     environment_name: Djangogithubactionaws-env
+      #     version_label: 12350
+      #     region: "us-east-1"
+      #     deployment_package: deploy.zip
