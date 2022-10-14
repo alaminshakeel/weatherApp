@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.http import HttpResponse
 from django.shortcuts import render
 from weatherapp import views
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 frontend_urls = [
   path('', views.index),
@@ -29,3 +30,5 @@ urlpatterns = [
   path('', include(frontend_urls)),
   path('api/', include('weather.urls'))
 ]
+
+urlpatterns += staticfiles_urlpatterns()
