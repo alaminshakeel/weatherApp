@@ -12,6 +12,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Copy repository contents via scp
+        uses: appleboy/scp-action@master
+        env:
+          HOST: ${{ secrets.VPSDIME_HOST }}
+          USERNAME: ${{ secrets.VPSDIME_USERNAME }}
+          PORT: ${{ secrets.VPSDIME_PORT }}
+          KEY: ${{ secrets.VPSDIME_SSHKEY }}
+        with:
+          source: "."
+          target: "weatherapp"
+
       - name: SSH into production server & pull latest codebase
         uses: appleboy/ssh-action@master
         with:
