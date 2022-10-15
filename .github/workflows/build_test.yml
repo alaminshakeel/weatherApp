@@ -32,17 +32,19 @@ jobs:
           PORT: ${{ secrets.VPSDIME_PORT }}
           KEY: ${{ secrets.VPSDIME_SSHKEY }}
           script: |
-            cd weatherapp
-            git checkout .
+            pwd
+            cd /root/weatherapp
             git pull
             cd frontend
-            npm i
+            npm install
             npm run build
             cd ..
-            python -m pip install --upgrade pip
+            source venv/bin/activate
+#            python3 -m pip install --upgrade pip
             pip install -r requirements.txt
-            python manage.py migrate
-            python manage.py collectstatic --no-input
+            python3 manage.py migrate
+            python3 manage.py collectstatic --no-input
+            gunicorn weatherapp.wsgi:application --bind 107.155.116.29:8000
             
 
 #      - name: Checkout Frontend code
