@@ -27,11 +27,12 @@ jobs:
       - name: Checkout Frontend code
         uses: actions/checkout@v2
 
-      - name: Build Frontend
+      - name: Prepare Frontend
         uses: actions/setup-node@v2
         with:
           node-version: "12.x"
           cache: "npm"
+      - name: Build frontend
         run: |
             cd frontend
             npm i
