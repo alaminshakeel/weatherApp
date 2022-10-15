@@ -24,8 +24,8 @@ jobs:
             git checkout .
             git pull
 
-      - name: Checkout Frontend code
-        uses: actions/checkout@v2
+#      - name: Checkout Frontend code
+#        uses: actions/checkout@v2
 
       - name: Prepare Frontend
         uses: actions/setup-node@v2
@@ -39,8 +39,8 @@ jobs:
             npm i
             npm run build
 
-      - name: Checkout Backend code
-        uses: actions/checkout@v2
+#      - name: Checkout Backend code
+#        uses: actions/checkout@v2
       - name: Set up Python Environment
         uses: actions/setup-python@v2
         with:
