@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: "12.x"
           cache: "npm"
-          script: |
+        run: |
             cd frontend
             npm i
             npm run build
