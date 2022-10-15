@@ -7,11 +7,35 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: SSH into production server & pull latest codebase
+        uses: appleboy/ssh-action@master
+        with:
+          HOST: ${{ secrets.VPSDIME_HOST }}
+          USERNAME: ${{ secrets.VPSDIME_USERNAME }}
+          PORT: ${{ secrets.VPSDIME_PORT }}
+          KEY: ${{ secrets.VPSDIME_SSHKEY }}
+          script: |
+            cd weatherapp
+            git checkout .
+            git pull
+
+      - name: Checkout Frontend code
+      - uses: actions/checkout@v2
+      - name: Build Frontend
+        working-directory: ./frontend
+      - name: Use Node.js to build
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12.x"
+          cache: "npm"
+      - run: npm i
+      - run: npm run build
+
+      - name: Checkout Backend code
         uses: actions/checkout@v2
       - name: Set up Python Environment
         uses: actions/setup-python@v2
@@ -20,37 +44,38 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirement.txt
-      # - name: Build Frontend
-      #   working-directory: ./frontend
-      #   run: |
-      #     npm install
-      #     npm run build
+          pip install -r requirements.txt
+          python manage.py migrate
+          python manage.py collectionstatic
+#          touch ./logs/gunicorn.log
+#          touch ./logs/gunicorn-access.log
 
-  deploy:
-    needs: [build]
-    runs-on: ubuntu-latest
 
-    steps:
-      - name: Copy repository contents via scp
-        uses: appleboy/scp-action@master
-        env:
-          HOST: ${{ secrets.VPSDIME_HOST }}
-          USERNAME: ${{ secrets.VPSDIME_USERNAME }}
-          PORT: ${{ secrets.VPSDIME_PORT }}
-          KEY: ${{ secrets.VPSDIME_SSHKEY }}
-        with:
-          source: "."
-          target: "/var/www/mywebsite"
+#  deploy:
+#    needs: [build]
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Copy repository contents via scp
+#        uses: appleboy/scp-action@master
+#        env:
+#          HOST: ${{ secrets.VPSDIME_HOST }}
+#          USERNAME: ${{ secrets.VPSDIME_USERNAME }}
+#          PORT: ${{ secrets.VPSDIME_PORT }}
+#          KEY: ${{ secrets.VPSDIME_SSHKEY }}
+#        with:
+#          source: "."
+#          target: "/var/www/mywebsite"
 
-      - name: Executing remote command
-        uses: appleboy/ssh-action@master
-        with:
-          HOST: ${{ secrets.VPSDIME_HOST }}
-          USERNAME: ${{ secrets.VPSDIME_USERNAME }}
-          PORT: ${{ secrets.VPSDIME_PORT }}
-          KEY: ${{ secrets.VPSDIME_SSHKEY }}
-          script: ls
+#      - name: SSH into production server
+#        uses: appleboy/ssh-action@master
+#        with:
+#          HOST: ${{ secrets.VPSDIME_HOST }}
+#          USERNAME: ${{ secrets.VPSDIME_USERNAME }}
+#          PORT: ${{ secrets.VPSDIME_PORT }}
+#          KEY: ${{ secrets.VPSDIME_SSHKEY }}
+#          script: ls
 
         # - name: Deploy to EB
         #   uses: einaregilsson/beanstalk-deploy@v20
