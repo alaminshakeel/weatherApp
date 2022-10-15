@@ -25,14 +25,16 @@ jobs:
 
       - name: Checkout Frontend code
         uses: actions/checkout@v2
+
       - name: Build Frontend
         uses: actions/setup-node@v2
-        working-directory: ./frontend
         with:
           node-version: "12.x"
           cache: "npm"
-      - run: npm i
-      - run: npm run build
+          script: |
+            cd frontend
+            npm i
+            npm run build
 
       - name: Checkout Backend code
         uses: actions/checkout@v2
