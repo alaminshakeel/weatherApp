@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
       - name: SSH into production server & pull latest codebase
         uses: appleboy/ssh-action@master
         with:
