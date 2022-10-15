@@ -43,8 +43,8 @@ jobs:
             pip install -r requirements.txt
             python3 manage.py migrate
             python3 manage.py collectstatic --no-input
-            pkill gunicorn
-            nohup gunicorn weatherapp.wsgi:application --bind 107.155.116.29:8000 </dev/null >/dev/null 2>&1
+#            pkill gunicorn
+#            nohup gunicorn weatherapp.wsgi:application --bind 107.155.116.29:8000 </dev/null >/dev/null 2>&1
             
 
         #            python3 -m pip install --upgrade pip
